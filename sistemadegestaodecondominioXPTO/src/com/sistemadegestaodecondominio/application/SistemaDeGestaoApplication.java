@@ -4,11 +4,12 @@
  */
 package com.sistemadegestaodecondominio.application;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
+import com.sistemadegestaodecondominio.model.Condominio;
 import com.sistemadegestaodecondominio.model.Fracao;
 import com.sistemadegestaodecondominio.service.FracaoService;
-import com.sistemadegestaodecondominio.service.IStorage;
 import com.sistemadegestaodecondominio.service.ProprietarioService;
 import com.sistemadegestaodecondominio.service.StorageService;
 import com.sistemadegestaodecondominio.service.UI;
@@ -20,16 +21,34 @@ import com.sistemadegestaodecondominio.service.UI;
 public class SistemaDeGestaoApplication {
 
   public static void main(String[] args) {
-    Scanner scanner = new Scanner(System.in);
     @SuppressWarnings("rawtypes")
     StorageService storage = new StorageService<>("presistence");
-    FracaoService fracaoService = new FracaoService(storage);
-    ProprietarioService proprietarioService = new ProprietarioService();
+    Scanner scanner = new Scanner(System.in);
+
+    ProprietarioService proprietarioService = new ProprietarioService(storage);
+    FracaoService fracaoService = new FracaoService(storage, proprietarioService);
+    Condominio condominio = new Condominio(fracaoService, storage);
+    
+    UI applicaUi = new UI(condominio, fracaoService, proprietarioService, scanner);
+
     proprietarioService.CarregarDados();
     fracaoService.CarregarDados();
-    Fracao farc = fracaoService.getFracaoPorId("c1347ac9-59e3-4f7e-8d70-f73ce9ca4948");
-    System.out.println(farc.getLocalizacao());
+    condominio.CarregarDados();
+    if(!storage.pathExiste("Condominio.txt")){
+        storage.deleteFile("Proprietario.txt");
+        storage.deleteFile("Fracao.txt");
+
+        condominio = applicaUi.telaCriarCondominio();
+    }
+  
+    applicaUi.iniciarAplicacao();
+
+
     fracaoService.SalvarDados();
+    proprietarioService.SalvarDados();
+    condominio.SalvarDados();
     scanner.close();
   }
+
+  
 }

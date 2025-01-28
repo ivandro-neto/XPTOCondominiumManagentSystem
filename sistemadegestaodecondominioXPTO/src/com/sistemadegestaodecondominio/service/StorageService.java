@@ -1,20 +1,30 @@
 package com.sistemadegestaodecondominio.service;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.sistemadegestaodecondominio.model.Fracao;
-
 public class StorageService<T> implements IStorage<T> {
     private final String directory;
 
-    // Construtor para permitir customização do diretório
+    public boolean pathExiste(String path) {
+        File file = new File(directory + path);  // Cria um objeto File com o caminho fornecido
+        return file.exists();        // Retorna true se o caminho existir, false caso contrário
+    }
+    public boolean deleteFile(String path) {
+        File file = new File(directory + path);  // Cria um objeto File com o caminho fornecido
+        return file.delete();        // Retorna true se o arquivo foi apagado com sucesso, false caso contrário
+    }
+
     public StorageService(String directory) {
         this.directory = directory.endsWith("/") ? directory : directory + "/";
         File dir = new File(this.directory);
         if (!dir.exists()) {
-            dir.mkdirs(); // Garante que o diretório exista
+            dir.mkdirs();
         }
     }
 
@@ -25,8 +35,8 @@ public class StorageService<T> implements IStorage<T> {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fullPath))) {
             if (data instanceof List<?>) {
                 for (Object item : (List<?>) data) {
-                    writer.write(item.toString()); // Escreve cada objeto como texto no ficheiro
-                    writer.newLine(); // Nova linha para o próximo objeto
+                    writer.write(item.toString()); 
+                    writer.newLine(); 
                 }
             } else {
                 writer.write(data.toString());
@@ -37,23 +47,20 @@ public class StorageService<T> implements IStorage<T> {
     }
 
     @Override
-    @SuppressWarnings("unchecked") // Suprime aviso de cast genérico
+    @SuppressWarnings("unchecked") 
     public ArrayList<T> Carregar(String path) {
         String fullPath = directory + path;
         try (BufferedReader reader = new BufferedReader(new FileReader(fullPath))) {
             String line;
             ArrayList<T> items = new ArrayList<T>();
             while ((line = reader.readLine()) != null) {
-                // A conversão de linha para objeto pode ser feita aqui dependendo do formato
-                // Por exemplo, se for uma representação simples de objetos Fracao
-                // Exemplo de conversão simples (pode ser ajustado conforme os dados):
-                T item = (T) line; // Aqui você pode usar um conversor adequado para transformar a string de volta em um objeto
+                T item = (T) line; 
                 items.add(item);
             }
             return items;
         } catch (IOException e) {
             System.err.println("Erro ao carregar o objeto do arquivo '" + fullPath + "': " + e.getMessage());
         }
-        return new ArrayList<>(); // Retorna uma lista vazia caso ocorra algum erro
+        return new ArrayList<>();
     }
 }

@@ -1,2 +1,0 @@
-Loja{id='c1347ac9-59e3-4f7e-8d70-f73ce9ca4948', area='456.550000', percentagem='0.000000', localizacao='Zona B, n-4589', proprietarioId='9009b3e1-df66-4e6d-afc6-05ee1cf549ad'}
-Garagem{id='e0f449e0-8b01-4f9f-a305-439089d9d9bb', area='478.550000', percentagem='0.000000', localizacao='Zona A, n-7846', proprietarioId='5251fe83-8759-4280-a6cd-2a1e5c2baa52', capacidade='4', temLavagem='true'}
