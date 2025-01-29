@@ -182,7 +182,6 @@ public class Condominio implements Serializable {
   @SuppressWarnings("unchecked")
   public Condominio CarregarDados(){
     try {
-
       ArrayList<String> data = _storageService.Carregar(path);
       SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
       String regex = "Condominio\\{id='([^']+)', morada='([^']+)', despesaGeral='([^']+)', despesaElevadores='([^']+)', dataConstrucao='([^']+)', nFracoes='([^']+)'\\}";
@@ -195,13 +194,14 @@ public class Condominio implements Serializable {
           throw new CondominioException(SistemaErrorMensagem.ERRO_DESERIALIZAR_STRING + register);
         }
 
-        Condominio condominio = new Condominio(_fracaoService, _storageService);
+        Condominio condominio = new Condominio();
         condominio.setId(matcher.group(1)); // id
         condominio.setMorada(matcher.group(2)); // Morada
         condominio.setDespesaGeral(Double.parseDouble(matcher.group(3))); // Despesas Geral
         condominio.setDespesaElevadores(Double.parseDouble(matcher.group(4))); // Despesas Elevadores
         condominio.setDataConstrucao(dateFormat.parse(matcher.group(5))); // Data de Contrucao
         condominio.setNFracoes(Integer.parseInt(matcher.group(6))); // Numero de fracoes
+        System.out.println("Sucesso ao Carregar dados do condominio.");
         return condominio;
       }
       return null;

@@ -1,1 +1,0 @@
-Proprietario{id='fb4a8533-6cd4-4821-b2b5-2ad945891a19', nome='Ivandro Neto', morada='Luanda-Sul', telefone='949359054', telemovel='', email='ivandroneto1@gmail.com', dataNascimento='27/02/2004'}

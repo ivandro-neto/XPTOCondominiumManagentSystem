@@ -13,11 +13,12 @@ import com.sistemadegestaodecondominio.model.Loja;
 
 public class FracaoService {
   private ArrayList<Fracao> _fracoes;
+  @SuppressWarnings("rawtypes")
   private StorageService _storageService;
   private ProprietarioService _ProprietarioService;
   private final String path = "Fracao.txt";
 
-  public FracaoService(StorageService storage, ProprietarioService proprietarioService) {
+  public FracaoService(@SuppressWarnings("rawtypes") StorageService storage, ProprietarioService proprietarioService) {
     _storageService = storage;
     _ProprietarioService = proprietarioService;
     _fracoes = new ArrayList<>();
@@ -136,6 +137,11 @@ public class FracaoService {
     } catch (FracaoException e) {
       System.out.println(e.getMessage());
     }
+  }
+
+  public void limpar(){
+    _fracoes = null;
+    _ProprietarioService.limpar();
   }
 
   @SuppressWarnings("unchecked")

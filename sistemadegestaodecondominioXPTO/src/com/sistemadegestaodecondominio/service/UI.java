@@ -1,9 +1,7 @@
 package com.sistemadegestaodecondominio.service;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 import java.util.function.Consumer;
@@ -212,13 +210,15 @@ public class UI {
       garagem.setNCapacidadeLigeiros(input.nextInt());
       input.nextLine(); // Limpa o newline
       System.out.println("Tem serviços de Lavagem?(S-Sim | N-Nao)");
-      garagem.setTemLavagem(input.nextLine() == "S" || _Scanner.nextLine() == "Sim");
+      String resposta = input.nextLine();
+      garagem.setTemLavagem(resposta.equalsIgnoreCase("S") || resposta.equalsIgnoreCase("Sim"));
     }
     // Processamento de Arrecadacao
     else if (fracao instanceof Arrecadacao) {
       Arrecadacao arrecadacao = (Arrecadacao) fracao;
       System.out.println("Tem Porta Blindada?(S-Sim | N-Nao)");
-      arrecadacao.setTemPortaBlindada(input.nextLine() == "S" || _Scanner.nextLine() == "Sim");
+      String resposta = input.nextLine();
+      arrecadacao.setTemPortaBlindada(resposta.equalsIgnoreCase("S") || resposta.equalsIgnoreCase("Sim"));
     }
     // Processamento de Apartamento
     else if (fracao instanceof Apartamento) {
@@ -240,7 +240,8 @@ public class UI {
       apartamento.setNCasasDeBanho(input.nextInt());
       input.nextLine(); // Limpa o newline
       System.out.println("Possui um terraço?(S-Sim | N-Nao)");
-      apartamento.setTemTerraco(input.nextLine() == "S" || _Scanner.nextLine() == "Sim");
+      String resposta = input.nextLine();
+      apartamento.setTemTerraco( resposta.equalsIgnoreCase("S") || resposta.equalsIgnoreCase("Sim"));
     }
     _condominio.inserirFracao(fracao);
   }
@@ -428,16 +429,23 @@ public class UI {
 
 @SuppressWarnings("rawtypes")
 public void telaAvisoAcaoArriscada(){
+  Scanner input = _Scanner;
   System.out.println("Deseja realmente deletar todos os dados em Memoria?");
   System.out.println("Nota : (* Acao inreversivel)");
   System.out.println("Pretende avancar?(S-Sim | N-Nao)");
-  if(_Scanner.nextLine() == "S" || _Scanner.nextLine() == "Sim"){
+  String resposta = input.nextLine();
+  if(resposta.equalsIgnoreCase("S") || resposta.equalsIgnoreCase("Sim")){
     StorageService storageService = new StorageService<>("presistence");
     System.out.println(storageService.removerFile("Condominio.txt") ? SistemaErrorMensagem.SUCESSO_APAGAR_FICHEIRO : SistemaErrorMensagem.ERRO_APAGAR_FICHEIRO);
     System.out.println(storageService.removerFile("Fracao.txt") ? SistemaErrorMensagem.SUCESSO_APAGAR_FICHEIRO : SistemaErrorMensagem.ERRO_APAGAR_FICHEIRO);
     System.out.println(storageService.removerFile("Proprietario.txt") ? SistemaErrorMensagem.SUCESSO_APAGAR_FICHEIRO : SistemaErrorMensagem.ERRO_APAGAR_FICHEIRO);
+    _fracaoService.limpar();
+    _proprietarioService.limpar();
+    _condominio = telaCriarCondominio();
+    _condominio.setFracaoService(_fracaoService);
+    
   }
-  _condominio = telaCriarCondominio();
+  iniciarAplicacao();
 }
 
   public boolean iniciarAplicacao() {

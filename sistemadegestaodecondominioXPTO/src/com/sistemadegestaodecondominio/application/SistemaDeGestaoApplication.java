@@ -27,9 +27,9 @@ public class SistemaDeGestaoApplication {
     FracaoService fracaoService = new FracaoService(storage, proprietarioService);
     Condominio condominio = new Condominio();
     
+    condominio = condominio.CarregarDados();
     proprietarioService.carregarDados();
     fracaoService.carregarDados();
-    condominio.CarregarDados();
     
     
     UI applicaUi = new UI(condominio, fracaoService, proprietarioService, scanner);

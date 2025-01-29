@@ -96,6 +96,9 @@ public class ProprietarioService {
     }
   }
 
+  public void limpar(){
+    _proprietarios = null;
+  }
   @SuppressWarnings("unchecked")
   public void salvarDados() {
     try {
