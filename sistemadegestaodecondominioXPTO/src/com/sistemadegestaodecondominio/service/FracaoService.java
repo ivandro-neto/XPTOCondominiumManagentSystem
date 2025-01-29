@@ -2,6 +2,9 @@ package com.sistemadegestaodecondominio.service;
 
 import java.util.ArrayList;
 
+import com.sistemadegestaodecondominio.exceptions.FracaoException;
+import com.sistemadegestaodecondominio.exceptions.messages.error.FracaoErrorMensagem;
+import com.sistemadegestaodecondominio.exceptions.messages.sucess.FracaoSucessoMensagem;
 import com.sistemadegestaodecondominio.model.Apartamento;
 import com.sistemadegestaodecondominio.model.Arrecadacao;
 import com.sistemadegestaodecondominio.model.Fracao;
@@ -17,19 +20,32 @@ public class FracaoService {
   public FracaoService(StorageService storage, ProprietarioService proprietarioService) {
     _storageService = storage;
     _ProprietarioService = proprietarioService;
-    _fracoes = new ArrayList<Fracao>();
+    _fracoes = new ArrayList<>();
   }
 
   public Fracao getFracaoPorId(String id) {
-    for (Fracao fracao : _fracoes) {
-      if (fracao.getId().equals(id))
-        return fracao;
+    try {
+      for (Fracao fracao : _fracoes) {
+        if (fracao.getId().equals(id))
+          return fracao;
+      }
+      throw new FracaoException(FracaoErrorMensagem.ERRO_FRACAO_NAO_ENCONTRADA);
+    } catch (FracaoException e) {
+      System.out.println(e.getMessage());
+      return null;
     }
-    return null;
   }
 
   public ArrayList<Fracao> getFracoes() {
-    return _fracoes;
+    try {
+      if (_fracoes.isEmpty()) {
+        throw new FracaoException(FracaoErrorMensagem.ERRO_LISTAR_FRACOES);
+      }
+      return _fracoes;
+    } catch (FracaoException e) {
+      System.out.println(e.getMessage());
+      return new ArrayList<>();
+    }
   }
 
   public Fracao getFracaoPeloProprietario(String nomeProprietario) {
@@ -41,19 +57,33 @@ public class FracaoService {
   }
 
   public ArrayList<String> toStringFormat() {
-    ArrayList<String> newList = new ArrayList<String>();
-
+    ArrayList<String> newList = new ArrayList<>();
     for (Fracao fracao : _fracoes)
       newList.add(fracao.toString());
     return newList;
   }
 
   public void adicionarFracao(Fracao fracao) {
-    _fracoes.add(fracao);
+    try {
+      if (fracao == null) {
+        throw new FracaoException(FracaoErrorMensagem.ERRO_CRIAR_FRACAO);
+      }
+      _fracoes.add(fracao);
+      System.out.println(FracaoSucessoMensagem.SUCESSO_CRIAR_FRACAO);
+    } catch (FracaoException e) {
+      System.out.println(e.getMessage());
+    }
   }
 
   public void removerFracao(Fracao fracao) {
-    _fracoes.remove(fracao);
+    try {
+      if (!_fracoes.remove(fracao)) {
+        throw new FracaoException(FracaoErrorMensagem.ERRO_REMOVER_FRACAO);
+      }
+      System.out.println(FracaoSucessoMensagem.SUCESSO_REMOVER_FRACAO);
+    } catch (FracaoException e) {
+      System.out.println(e.getMessage());
+    }
   }
 
   public Fracao criarFracao(String tipo) {
@@ -72,37 +102,52 @@ public class FracaoService {
   }
 
   @SuppressWarnings("unchecked")
-  public void CarregarDados() {
-    ArrayList<String> data = _storageService.Carregar(path);
-
-    for (String line : data) {
-      if (line.startsWith("Loja")) {
-        Loja loja = new Loja();
-        loja = (Loja) loja.deserializacao(line);
-        loja.setProprietario(_ProprietarioService.getProprietarioPeloId(loja.getProprietario().getId()));
-        _fracoes.add(loja);
-      } else if (line.startsWith("Garagem")) {
-        Garagem garagem = new Garagem();
-        garagem = (Garagem) garagem.deserializacao(line);
-        garagem.setProprietario(_ProprietarioService.getProprietarioPeloId(garagem.getProprietario().getId()));
-        _fracoes.add(garagem);
-      } else if (line.startsWith("Apartamento")) {
-        Apartamento apartamento = new Apartamento();
-        apartamento = (Apartamento) apartamento.deserializacao(line);
-        apartamento.setProprietario(_ProprietarioService.getProprietarioPeloId(apartamento.getProprietario().getId()));
-        _fracoes.add(apartamento);
-      } else if (line.startsWith("Arrecadacao")) {
-        Arrecadacao arrecadacao = new Arrecadacao();
-        arrecadacao = (Arrecadacao) arrecadacao.deserializacao(line);
-        arrecadacao.setProprietario(_ProprietarioService.getProprietarioPeloId(arrecadacao.getProprietario().getId()));
-        _fracoes.add(arrecadacao);
+  public void carregarDados() {
+    try {
+      ArrayList<String> data = _storageService.Carregar(path);
+      if (data.isEmpty()) {
+        throw new FracaoException(FracaoErrorMensagem.ERRO_CARREGAR_DADOS);
       }
 
+      for (String line : data) {
+        if (line.startsWith("Loja")) {
+          Loja loja = new Loja();
+          loja = (Loja) loja.deserializacao(line);
+          loja.setProprietario(_ProprietarioService.getProprietarioPeloId(loja.getProprietario().getId()));
+          _fracoes.add(loja);
+        } else if (line.startsWith("Garagem")) {
+          Garagem garagem = new Garagem();
+          garagem = (Garagem) garagem.deserializacao(line);
+          garagem.setProprietario(_ProprietarioService.getProprietarioPeloId(garagem.getProprietario().getId()));
+          _fracoes.add(garagem);
+        } else if (line.startsWith("Apartamento")) {
+          Apartamento apartamento = new Apartamento();
+          apartamento = (Apartamento) apartamento.deserializacao(line);
+          apartamento.setProprietario(_ProprietarioService.getProprietarioPeloId(apartamento.getProprietario().getId()));
+          _fracoes.add(apartamento);
+        } else if (line.startsWith("Arrecadacao")) {
+          Arrecadacao arrecadacao = new Arrecadacao();
+          arrecadacao = (Arrecadacao) arrecadacao.deserializacao(line);
+          arrecadacao.setProprietario(_ProprietarioService.getProprietarioPeloId(arrecadacao.getProprietario().getId()));
+          _fracoes.add(arrecadacao);
+        }
+      }
+      System.out.println(FracaoSucessoMensagem.SUCESSO_CARREGAR_DADOS);
+    } catch (FracaoException e) {
+      System.out.println(e.getMessage());
     }
   }
 
   @SuppressWarnings("unchecked")
-  public void SalvarDados() {
-    _storageService.Salvar(toStringFormat(), path);
+  public void salvarDados() {
+    try {
+      if (_fracoes.isEmpty()) {
+        throw new FracaoException(FracaoErrorMensagem.ERRO_SALVAR_DADOS);
+      }
+      _storageService.Salvar(toStringFormat(), path);
+      System.out.println(FracaoSucessoMensagem.SUCESSO_SALVAR_DADOS);
+    } catch (FracaoException e) {
+      System.out.println(e.getMessage());
+    }
   }
 }

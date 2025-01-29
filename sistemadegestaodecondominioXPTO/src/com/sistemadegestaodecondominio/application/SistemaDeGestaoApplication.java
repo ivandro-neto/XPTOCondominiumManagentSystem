@@ -4,11 +4,9 @@
  */
 package com.sistemadegestaodecondominio.application;
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
 import com.sistemadegestaodecondominio.model.Condominio;
-import com.sistemadegestaodecondominio.model.Fracao;
 import com.sistemadegestaodecondominio.service.FracaoService;
 import com.sistemadegestaodecondominio.service.ProprietarioService;
 import com.sistemadegestaodecondominio.service.StorageService;
@@ -27,25 +25,34 @@ public class SistemaDeGestaoApplication {
 
     ProprietarioService proprietarioService = new ProprietarioService(storage);
     FracaoService fracaoService = new FracaoService(storage, proprietarioService);
-    Condominio condominio = new Condominio(fracaoService, storage);
+    Condominio condominio = new Condominio();
+    
+    proprietarioService.carregarDados();
+    fracaoService.carregarDados();
+    condominio.CarregarDados();
+    
     
     UI applicaUi = new UI(condominio, fracaoService, proprietarioService, scanner);
-
-    proprietarioService.CarregarDados();
-    fracaoService.CarregarDados();
-    condominio.CarregarDados();
+    
     if(!storage.pathExiste("Condominio.txt")){
-        storage.deleteFile("Proprietario.txt");
-        storage.deleteFile("Fracao.txt");
+        storage.removerFile("Proprietario.txt");
+        storage.removerFile("Fracao.txt");
 
         condominio = applicaUi.telaCriarCondominio();
     }
-  
+    condominio.setFracaoService(fracaoService);
+    condominio.setStorageService(storage);
+    
+    applicaUi.setCondominio(condominio);
+
     applicaUi.iniciarAplicacao();
 
-
-    fracaoService.SalvarDados();
-    proprietarioService.SalvarDados();
+    fracaoService = applicaUi.getFracaoService();
+    proprietarioService = applicaUi.getProprietarioService();
+    condominio = applicaUi.getCondomino();
+    
+    fracaoService.salvarDados();
+    proprietarioService.salvarDados();
     condominio.SalvarDados();
     scanner.close();
   }

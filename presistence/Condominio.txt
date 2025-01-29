@@ -1,0 +1,1 @@
+Condominio{id='66b17bea-0f31-48e7-bb47-f36613c23101', morada='Luanda, Talatona', despesaGeral='789754.00', despesaElevadores='4654.00', dataConstrucao='14/02/2000', nFracoes='1'}

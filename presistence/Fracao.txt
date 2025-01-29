@@ -1,0 +1,1 @@
+Apartamento{id='8b18de74-8841-407e-80fb-4a6faf3eb1b4', area='456.550000', percentagem='100.000000', localizacao='Zona Azul, Rua B 45', proprietarioId='fb4a8533-6cd4-4821-b2b5-2ad945891a19', tipologia='T3', numeroVarandas='0', numeroCasaDeBanho='2', temTerraco='false'}

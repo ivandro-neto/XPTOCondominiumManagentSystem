@@ -1,6 +1,7 @@
 package com.sistemadegestaodecondominio.model;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,6 +9,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.sistemadegestaodecondominio.exceptions.CondominioException;
+import com.sistemadegestaodecondominio.exceptions.messages.error.SistemaErrorMensagem;
 import com.sistemadegestaodecondominio.service.FracaoService;
 import com.sistemadegestaodecondominio.service.IStorage;
 import com.sistemadegestaodecondominio.service.StorageService;
@@ -24,15 +27,19 @@ public class Condominio implements Serializable {
   private Date _dataConstrucao;
   private int _nFracoes;
   private FracaoService _fracaoService;
+  @SuppressWarnings("rawtypes")
   private StorageService _storageService;
   private final String path = "Condominio.txt";
 
-  public Condominio(FracaoService fracaoService, StorageService storage) {
+  public Condominio(FracaoService fracaoService, @SuppressWarnings("rawtypes") StorageService storage) {
     _fracaoService = fracaoService;
     _storageService = storage;
   }
 
- public Condominio() {}
+ public Condominio() 
+ {
+     _storageService = new StorageService<>("presistence");
+ }
   /* Getters */
   public String getId() {
     return _id;
@@ -88,6 +95,7 @@ public class Condominio implements Serializable {
     _fracaoService = fracaoService;
   }
 
+  @SuppressWarnings("rawtypes")
   public void setStorageService(StorageService storage){
     _storageService = storage;
   }
@@ -95,13 +103,11 @@ public class Condominio implements Serializable {
   public void inserirFracao(Fracao fracao) {
     _fracaoService.adicionarFracao(fracao);
     _nFracoes++;
-    System.out.println("Fracao adicionada com successo.");
   }
   
   public void removerFracao(Fracao fracao) {
     _fracaoService.removerFracao(fracao);
     _nFracoes--;
-    System.out.println("Fracao removida com successo.");
   }
 
   public void recalcularPercentagem() {
@@ -154,12 +160,12 @@ public class Condominio implements Serializable {
   public void apresentarDados() {
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
     System.out.println(String.format(
-            "ID : %s\\n" + //
-            "AREA(m2) : %.2f\\n" + //
-            "DESPESAS GERAL : %.2f\\n" + //
-            "DESPESAS ELEVADORES : %.2f\\n" + //
-            "LOCALIZACAO : %s\\n" + //
-            "FRACOES : %d\\n" + //
+            "ID : %s\n" + //
+            "AREA(m2) : %.2f\n" + //
+            "DESPESAS GERAL : %.2f\n" + //
+            "DESPESAS ELEVADORES : %.2f\n" + //
+            "LOCALIZACAO : %s\n" + //
+            "FRACOES : %d\n" + //
             "DATA DE FUNDACAO : %s",
         _id, calcularAreaTotal(), _despesaGeral, _despesaElevadores, _morada, _nFracoes,
         dateFormat.format(_dataConstrucao)));
@@ -167,13 +173,14 @@ public class Condominio implements Serializable {
 
   @Override
   public String toString() {
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
     String obj = "Condominio{id='%s', morada='%s', despesaGeral='%.2f', despesaElevadores='%.2f', dataConstrucao='%s', nFracoes='%d'}";
-    return String.format(obj, this._id, this._morada, this._despesaGeral, this._despesaElevadores, this._dataConstrucao,
+    return String.format(obj, this._id, this._morada, this._despesaGeral, this._despesaElevadores, dateFormat.format(this._dataConstrucao),
         this._nFracoes);
   }
 
   @SuppressWarnings("unchecked")
-  public Condominio CarregarDados() {
+  public Condominio CarregarDados(){
     try {
 
       ArrayList<String> data = _storageService.Carregar(path);
@@ -185,7 +192,7 @@ public class Condominio implements Serializable {
         Matcher matcher = pattern.matcher(register);
 
         if (!matcher.find()) {
-          throw new IllegalArgumentException("Erro ao tentar deserializar a string: " + register);
+          throw new CondominioException(SistemaErrorMensagem.ERRO_DESERIALIZAR_STRING + register);
         }
 
         Condominio condominio = new Condominio(_fracaoService, _storageService);
@@ -193,13 +200,13 @@ public class Condominio implements Serializable {
         condominio.setMorada(matcher.group(2)); // Morada
         condominio.setDespesaGeral(Double.parseDouble(matcher.group(3))); // Despesas Geral
         condominio.setDespesaElevadores(Double.parseDouble(matcher.group(4))); // Despesas Elevadores
-        condominio.setNFracoes(Integer.parseInt(matcher.group(5))); // id
-        condominio.setDataConstrucao(dateFormat.parse(matcher.group(6))); // id
+        condominio.setDataConstrucao(dateFormat.parse(matcher.group(5))); // Data de Contrucao
+        condominio.setNFracoes(Integer.parseInt(matcher.group(6))); // Numero de fracoes
         return condominio;
       }
       return null;
     } catch (Exception e) {
-      System.out.println("Falha ao carregar os dados do Condominio.");
+      System.out.println(e.getMessage());
       return null;
     }
   }

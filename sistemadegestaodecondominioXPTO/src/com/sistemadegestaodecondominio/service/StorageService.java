@@ -9,20 +9,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 public class StorageService<T> implements IStorage<T> {
-    private final String directory;
+    private final String DIRECTORY;
 
     public boolean pathExiste(String path) {
-        File file = new File(directory + path);  // Cria um objeto File com o caminho fornecido
+        File file = new File(DIRECTORY + path);  // Cria um objeto File com o caminho fornecido
         return file.exists();        // Retorna true se o caminho existir, false caso contrário
     }
-    public boolean deleteFile(String path) {
-        File file = new File(directory + path);  // Cria um objeto File com o caminho fornecido
+    public boolean removerFile(String path) {
+        File file = new File(DIRECTORY + path);  // Cria um objeto File com o caminho fornecido
         return file.delete();        // Retorna true se o arquivo foi apagado com sucesso, false caso contrário
     }
 
     public StorageService(String directory) {
-        this.directory = directory.endsWith("/") ? directory : directory + "/";
-        File dir = new File(this.directory);
+        DIRECTORY = directory.endsWith("/") ? directory : directory + "/";
+        File dir = new File(DIRECTORY);
         if (!dir.exists()) {
             dir.mkdirs();
         }
@@ -30,7 +30,7 @@ public class StorageService<T> implements IStorage<T> {
 
     @Override
    public void Salvar(T data, String path) {
-        String fullPath = directory + path;
+        String fullPath = DIRECTORY + path;
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fullPath))) {
             if (data instanceof List<?>) {
@@ -49,7 +49,7 @@ public class StorageService<T> implements IStorage<T> {
     @Override
     @SuppressWarnings("unchecked") 
     public ArrayList<T> Carregar(String path) {
-        String fullPath = directory + path;
+        String fullPath = DIRECTORY + path;
         try (BufferedReader reader = new BufferedReader(new FileReader(fullPath))) {
             String line;
             ArrayList<T> items = new ArrayList<T>();

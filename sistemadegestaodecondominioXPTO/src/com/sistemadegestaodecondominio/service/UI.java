@@ -9,6 +9,7 @@ import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import com.sistemadegestaodecondominio.exceptions.messages.error.SistemaErrorMensagem;
 import com.sistemadegestaodecondominio.model.Apartamento;
 import com.sistemadegestaodecondominio.model.Arrecadacao;
 import com.sistemadegestaodecondominio.model.Condominio;
@@ -33,6 +34,28 @@ public class UI {
     _condominio = condominio;
     _Scanner = scanner;
   }
+  
+  public FracaoService getFracaoService(){
+      return _fracaoService;
+  }
+  public ProprietarioService getProprietarioService(){
+      return _proprietarioService;
+  }
+  public Condominio getCondomino(){
+      return _condominio;
+  }
+  
+  public void setCondominio(Condominio condominio){
+      _condominio = condominio;
+  }
+  
+  public void setFracaoService(FracaoService fracaoService){
+      _fracaoService = fracaoService;
+  }
+  
+  public void setProprietarioService(ProprietarioService proprietarioService){
+      _proprietarioService = proprietarioService;
+  }
 
   public int exibirMenuPrincipal() {
     String[] mainMenu = {
@@ -40,7 +63,8 @@ public class UI {
         "1 - Gerenciar Frações",
         "2 - Gerenciar Condomínio",
         "3 - Gerenciar Despesas",
-        "4 - Sair"
+        "4 - Apagar Dados da Memoria",
+        "5 - Sair"
     };
     Scanner input = _Scanner;
     System.out.println("Gerenciador de Condominios XPTO");
@@ -188,13 +212,13 @@ public class UI {
       garagem.setNCapacidadeLigeiros(input.nextInt());
       input.nextLine(); // Limpa o newline
       System.out.println("Tem serviços de Lavagem?(S-Sim | N-Nao)");
-      garagem.setTemLavagem(input.nextLine().equalsIgnoreCase("S"));
+      garagem.setTemLavagem(input.nextLine() == "S" || _Scanner.nextLine() == "Sim");
     }
     // Processamento de Arrecadacao
     else if (fracao instanceof Arrecadacao) {
       Arrecadacao arrecadacao = (Arrecadacao) fracao;
       System.out.println("Tem Porta Blindada?(S-Sim | N-Nao)");
-      arrecadacao.setTemPortaBlindada(input.nextLine().equalsIgnoreCase("S"));
+      arrecadacao.setTemPortaBlindada(input.nextLine() == "S" || _Scanner.nextLine() == "Sim");
     }
     // Processamento de Apartamento
     else if (fracao instanceof Apartamento) {
@@ -216,7 +240,7 @@ public class UI {
       apartamento.setNCasasDeBanho(input.nextInt());
       input.nextLine(); // Limpa o newline
       System.out.println("Possui um terraço?(S-Sim | N-Nao)");
-      apartamento.setTemTerraco(input.nextLine().equalsIgnoreCase("S"));
+      apartamento.setTemTerraco(input.nextLine() == "S" || _Scanner.nextLine() == "Sim");
     }
     _condominio.inserirFracao(fracao);
   }
@@ -402,7 +426,21 @@ public class UI {
     }
   }
 
-  public void iniciarAplicacao() {
+@SuppressWarnings("rawtypes")
+public void telaAvisoAcaoArriscada(){
+  System.out.println("Deseja realmente deletar todos os dados em Memoria?");
+  System.out.println("Nota : (* Acao inreversivel)");
+  System.out.println("Pretende avancar?(S-Sim | N-Nao)");
+  if(_Scanner.nextLine() == "S" || _Scanner.nextLine() == "Sim"){
+    StorageService storageService = new StorageService<>("presistence");
+    System.out.println(storageService.removerFile("Condominio.txt") ? SistemaErrorMensagem.SUCESSO_APAGAR_FICHEIRO : SistemaErrorMensagem.ERRO_APAGAR_FICHEIRO);
+    System.out.println(storageService.removerFile("Fracao.txt") ? SistemaErrorMensagem.SUCESSO_APAGAR_FICHEIRO : SistemaErrorMensagem.ERRO_APAGAR_FICHEIRO);
+    System.out.println(storageService.removerFile("Proprietario.txt") ? SistemaErrorMensagem.SUCESSO_APAGAR_FICHEIRO : SistemaErrorMensagem.ERRO_APAGAR_FICHEIRO);
+  }
+  _condominio = telaCriarCondominio();
+}
+
+  public boolean iniciarAplicacao() {
     boolean continuar = true;
 
     while (continuar) {
@@ -419,11 +457,15 @@ public class UI {
           navegarMenu(this::exibirMenuDespesas, 3, this::gerenciarDespesas);
           break;
         case 4:
+          telaAvisoAcaoArriscada();
+          break;
+        case 5:
           continuar = false; // Encerra o programa
           break;
         default:
           break;
       }
     }
+    return continuar;
   }
 }
